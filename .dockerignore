@@ -1,0 +1,14 @@
+node_modules
+dist
+Dockerfile
+docker-compose.yml
+.git
+.gitignore
+.dockerignore
+.prettierrc
+.eslintrc.js
+LICENSE
+VERSION
+README.md
+Makefile
+test
