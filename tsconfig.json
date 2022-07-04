@@ -21,7 +21,8 @@
       "@bot/*": ["./src/bot/*"],
       "@database/*": ["./src/database/*"],
       "@pocket/*": ["./src/pocket/*"],
-      "@users/*": ["./src/users/*"]
+      "@users/*": ["./src/users/*"],
+      "@http/*": ["./src/http/*"]
     }
   }
 }

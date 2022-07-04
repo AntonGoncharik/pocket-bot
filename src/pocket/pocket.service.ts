@@ -2,26 +2,20 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 
 import { UsersService } from '@users/users.service';
 import { BotService } from '@bot/bot.service';
-
-import axios from 'axios';
-
-const axiosInstance = axios.create({
-  baseURL: process.env.POCKET_OAUTH_HOST,
-  headers: {
-    'Content-Type': 'application/json',
-    'X-Accept': 'application/json',
-  },
-});
-
-export const apiPost = (path: string, body: any, params: any = {}) => {
-  return axiosInstance.post(path, JSON.stringify(body), params);
-};
+import { HttpService } from '@http/http.service';
+import {
+  RequestTokenBody,
+  RequestTokenResponse,
+  AccessTokenBody,
+  AccessTokenResponse,
+} from './pocket.interface';
 
 @Injectable()
 export class PocketService {
   constructor(
     private usersService: UsersService,
     private botService: BotService,
+    private httpService: HttpService,
   ) {}
 
   async auth(chatId: string) {
@@ -44,12 +38,15 @@ export class PocketService {
 
   async getRequestToken(redirectUri: string): Promise<string> {
     try {
-      const { data } = await apiPost('request', {
+      const { code } = await this.httpService.post<
+        RequestTokenBody,
+        RequestTokenResponse
+      >('request', {
         consumer_key: process.env.POCKET_CONSUMER_KEY,
         redirect_uri: `${redirectUri}`,
       });
 
-      return data.code;
+      return code;
     } catch (error) {
       throw error;
     }
@@ -57,12 +54,15 @@ export class PocketService {
 
   async getAccessToken(requestToken: string): Promise<string> {
     try {
-      const { data } = await apiPost('authorize', {
+      const { accessToken } = await this.httpService.post<
+        AccessTokenBody,
+        AccessTokenResponse
+      >('authorize', {
         consumer_key: process.env.POCKET_CONSUMER_KEY,
         code: `${requestToken}`,
       });
 
-      return data.accessToken;
+      return accessToken;
     } catch (error) {
       throw error;
     }
