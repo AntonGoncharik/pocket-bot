@@ -1,4 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
+
+import { UsersService } from '@users/users.service';
+import { BotService } from '@bot/bot.service';
 
 import axios from 'axios';
 
@@ -16,6 +19,29 @@ export const apiPost = (path: string, body: any, params: any = {}) => {
 
 @Injectable()
 export class PocketService {
+  constructor(
+    private usersService: UsersService,
+    private botService: BotService,
+  ) {}
+
+  async auth(chatId: string) {
+    try {
+      const user = await this.usersService.getUserByChatId(+chatId);
+
+      if (!user) {
+        throw new BadRequestException();
+      }
+
+      const accessToken = await this.getAccessToken(user.request_token);
+      await this.usersService.update(+chatId, accessToken);
+      await this.botService.sendMessage(+chatId, 'Now you can save any sites');
+
+      return { url: process.env.TELEGRAM_BOT_HOST };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async getRequestToken(redirectUri: string): Promise<string> {
     try {
       const { data } = await apiPost('request', {
@@ -36,14 +62,14 @@ export class PocketService {
         code: `${requestToken}`,
       });
 
-      return data;
+      return data.accessToken;
     } catch (error) {
       throw error;
     }
   }
 
-  getRedirectUri(telegramId: number): string {
-    return `${process.env.HOST}?telegram_id=${telegramId}`;
+  getRedirectUri(chatId: number): string {
+    return `${process.env.HOST}/auth?chat_id=${chatId}`;
   }
 
   getAuthUri(requestToken: string, redirectUri: string): string {

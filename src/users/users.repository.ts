@@ -1,11 +1,18 @@
 export const CREATE_QUERY = `
   INSERT INTO users
-  (telegram_id)
-  VALUES ($1)
+  (chat_id, request_token)
+  VALUES ($1, $2)
   RETURNING *;
 `;
 
-export const GET_USER_BY_TELEGRAM_ID_QUERY = `
+export const UPDATE_QUERY = `
+  UPDATE users
+  SET access_token = $1
+  WHERE chat_id = $2
+  RETURNING *;
+`;
+
+export const GET_USER_BY_CHAT_ID_QUERY = `
   SELECT * FROM users
-  WHERE telegram_id=$1;
+  WHERE chat_id=$1;
 `;

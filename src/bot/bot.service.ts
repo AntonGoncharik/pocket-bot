@@ -25,27 +25,27 @@ export class BotService {
     this.bot.onText(/\/start/, this.start);
   }
 
-  async sendMessage(telegramId: number, message: string) {
-    await this.bot.sendMessage(telegramId, message);
+  async sendMessage(chatId: number, message: string) {
+    await this.bot.sendMessage(chatId, message);
   }
 
-  async start(msg: ITelegramBot.Message, match: RegExpExecArray | null) {
+  async start(msg: ITelegramBot.Message) {
     try {
-      const telegramId = msg.chat.id;
-      console.log(match);
-      const user = await this.usersService.getUserByTelegramId(telegramId);
+      const chatId = msg.chat.id;
+
+      const user = await this.usersService.getUserByChatId(chatId);
       if (user) {
-        await this.sendMessage(telegramId, 'user exists');
-        // return;
+        await this.sendMessage(chatId, 'user exists, you can save any sites');
+        return;
       }
 
-      const redirectUri = this.pocketService.getRedirectUri(telegramId);
+      const redirectUri = this.pocketService.getRedirectUri(chatId);
       const requestToken = await this.pocketService.getRequestToken(
         redirectUri,
       );
       const authUri = this.pocketService.getAuthUri(requestToken, redirectUri);
-      await this.sendMessage(telegramId, authUri);
-      // await this.usersService.create(telegramId);
+      await this.usersService.create(chatId, requestToken);
+      await this.sendMessage(chatId, authUri);
     } catch (error) {
       throw error;
     }
