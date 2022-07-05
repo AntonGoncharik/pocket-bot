@@ -49,7 +49,7 @@ jobs:
           ${{ env.SSH }} rm -rf pocket-bot
           ${{ env.SSH }} mkdir pocket-bot
           cat docker-compose.production.yml | ${{ env.SSH }} 'cat > pocket-bot/docker-compose.production.yml'
-          cat ${{ secrets.ENV }} | ${{ env.SSH }} 'cat > pocket-bot/.env'
+          echo ${{ secrets.ENV }} | ${{ env.SSH }} 'echo > pocket-bot/.env'
 
       - name: Stop containers
         run: ${{ env.DOCKER_RUN }} down
