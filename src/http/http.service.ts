@@ -3,7 +3,7 @@ import axios, { AxiosInstance } from 'axios';
 
 @Injectable()
 export class HttpService {
-  axiosInstance: AxiosInstance;
+  private axiosInstance: AxiosInstance;
 
   constructor() {
     this.init();

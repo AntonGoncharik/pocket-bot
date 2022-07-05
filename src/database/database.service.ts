@@ -6,10 +6,10 @@ export class DatabaseService {
   private pool: Pool;
 
   constructor() {
-    this.connect();
+    this.init();
   }
 
-  async connect(): Promise<void> {
+  async init(): Promise<void> {
     try {
       this.pool = new Pool({
         host: process.env.DB_HOST,

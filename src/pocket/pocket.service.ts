@@ -1,7 +1,5 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
-import { UsersService } from '@users/users.service';
-// import { BotService } from '@bot/bot.service';
 import { HttpService } from '@http/http.service';
 import {
   RequestTokenBody,
@@ -14,31 +12,7 @@ import {
 
 @Injectable()
 export class PocketService {
-  constructor(
-    private usersService: UsersService,
-    // private botService: BotService,
-    private httpService: HttpService,
-  ) {}
-
-  async auth(chatId: string) {
-    try {
-      const user = await this.usersService.getUserByChatId(+chatId);
-
-      if (!user) {
-        throw new BadRequestException();
-      }
-
-      const accessToken = await this.getAccessToken(user.request_token);
-
-      await this.usersService.update(+chatId, accessToken);
-
-      // await this.botService.sendMessage(+chatId, 'Now you can save any sites');
-
-      return { url: process.env.TELEGRAM_BOT_HOST };
-    } catch (error) {
-      throw error;
-    }
-  }
+  constructor(private httpService: HttpService) {}
 
   async getRequestToken(redirectUri: string): Promise<string> {
     try {
