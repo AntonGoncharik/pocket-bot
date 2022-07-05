@@ -67,6 +67,8 @@ jobs:
           ${{ env.SSH }} echo 'POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> pocket-bot/.env'
           ${{ env.SSH }} echo 'PGPORT=${{ secrets.PGPORT }} >> pocket-bot/.env'
 
+          ${{ env.SSH }} echo '${{ secrets.ENV }} > pocket-bot/.env2'
+
       - name: Stop containers
         run: ${{ env.DOCKER_RUN }} down
 
