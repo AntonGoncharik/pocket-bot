@@ -4,7 +4,7 @@ services:
     container_name: db
     image: postgres:14.4-alpine
     ports:
-      - 8000:5432
+      - 8010:5432
     volumes:
       - /app/pocket-bot/db:/var/lib/postgresql/data
     env_file:
@@ -14,12 +14,10 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: always
   migration:
     container_name: migration
     image: antgoncharik/pocket-bot
-    build:
-      context: .
-      dockerfile: Dockerfile
     env_file:
       - .env
     command: sh -c "/app/node_modules/.bin/db-migrate up"
@@ -29,15 +27,11 @@ services:
   server:
     container_name: server
     image: antgoncharik/pocket-bot
-    build:
-      context: .
-      dockerfile: Dockerfile
     ports:
-      - '8001:3000'
-    volumes:
-      - ./:/app
+      - '8011:3000'
     env_file:
       - .env
+    restart: always
     depends_on:
       db:
         condition: service_healthy

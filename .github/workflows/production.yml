@@ -1,0 +1,58 @@
+name: production
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+env:
+  SSH: ssh -T ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
+  DOCKER_RUN: ${{ env.SSH }} docker-compose -f ${{ secrets.WORKDIR }}/docker-compose.production.yml
+
+jobs:
+  build:b
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build image
+        run: docker build -t ${{ secrets.DOCKER_IMAGE_NAME }} -f Dockerfile.production .
+
+      - name: Login to DockerHub
+        run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+
+      - name: Push image to Docker Hub
+        run: docker push ${{ secrets.DOCKER_IMAGE_NAME }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    needs: build
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: SSH setting
+        run: |
+          mkdir ~/.ssh/
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Settings docker-compose and env
+        run: |
+          ${{ env.SSH }} rm -rf ${{ secrets.WORKDIR }}
+          ${{ env.SSH }} mkdir ${{ secrets.WORKDIR }}
+          cat docker-compose.production.yml | ${{ env.SSH }} 'cat > ${{ secrets.WORKDIR }}/docker-compose.production.yml'
+          cat ${{ secrets.ENV }} | ${{ env.SSH }} 'cat > ${{ secrets.WORKDIR }}/.env'
+
+      - name: Stop containers
+        run:  ${{ env.DOCKER_RUN }} down
+
+      - name: Run containers
+        run: ${{ env.DOCKER_RUN }} up -d --build
