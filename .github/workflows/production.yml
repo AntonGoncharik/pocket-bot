@@ -13,7 +13,7 @@ env:
   DOCKER_RUN: ${{ env.SSH }} docker-compose -f ${{ secrets.WORKDIR }}/docker-compose.production.yml
 
 jobs:
-  build:b
+  build:
     runs-on: ubuntu-latest
     environment: production
 
@@ -52,7 +52,7 @@ jobs:
           cat ${{ secrets.ENV }} | ${{ env.SSH }} 'cat > ${{ secrets.WORKDIR }}/.env'
 
       - name: Stop containers
-        run:  ${{ env.DOCKER_RUN }} down
+        run: ${{ env.DOCKER_RUN }} down
 
       - name: Run containers
         run: ${{ env.DOCKER_RUN }} up -d --build
