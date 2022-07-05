@@ -1,20 +1,22 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 
 import { UsersService } from '@users/users.service';
-import { BotService } from '@bot/bot.service';
+// import { BotService } from '@bot/bot.service';
 import { HttpService } from '@http/http.service';
 import {
   RequestTokenBody,
   RequestTokenResponse,
   AccessTokenBody,
   AccessTokenResponse,
+  AddBody,
+  AddResponse,
 } from './pocket.interface';
 
 @Injectable()
 export class PocketService {
   constructor(
     private usersService: UsersService,
-    private botService: BotService,
+    // private botService: BotService,
     private httpService: HttpService,
   ) {}
 
@@ -27,8 +29,10 @@ export class PocketService {
       }
 
       const accessToken = await this.getAccessToken(user.request_token);
+
       await this.usersService.update(+chatId, accessToken);
-      await this.botService.sendMessage(+chatId, 'Now you can save any sites');
+
+      // await this.botService.sendMessage(+chatId, 'Now you can save any sites');
 
       return { url: process.env.TELEGRAM_BOT_HOST };
     } catch (error) {
@@ -41,7 +45,7 @@ export class PocketService {
       const { code } = await this.httpService.post<
         RequestTokenBody,
         RequestTokenResponse
-      >('request', {
+      >('v3/oauth/request', {
         consumer_key: process.env.POCKET_CONSUMER_KEY,
         redirect_uri: `${redirectUri}`,
       });
@@ -54,10 +58,10 @@ export class PocketService {
 
   async getAccessToken(requestToken: string): Promise<string> {
     try {
-      const { accessToken } = await this.httpService.post<
+      const { access_token: accessToken } = await this.httpService.post<
         AccessTokenBody,
         AccessTokenResponse
-      >('authorize', {
+      >('v3/oauth/authorize', {
         consumer_key: process.env.POCKET_CONSUMER_KEY,
         code: `${requestToken}`,
       });
@@ -73,6 +77,18 @@ export class PocketService {
   }
 
   getAuthUri(requestToken: string, redirectUri: string): string {
-    return `${process.env.POCKET_AUTHORIZE_HOST}?request_token=${requestToken}&redirect_uri=${redirectUri}`;
+    return `${process.env.POCKET_HOST}/auth/authorize?request_token=${requestToken}&redirect_uri=${redirectUri}`;
+  }
+
+  async add(url: string, accessToken: string): Promise<void> {
+    try {
+      await this.httpService.post<AddBody, AddResponse>('v3/add', {
+        url,
+        consumer_key: process.env.POCKET_CONSUMER_KEY,
+        access_token: `${accessToken}`,
+      });
+    } catch (error) {
+      throw error;
+    }
   }
 }

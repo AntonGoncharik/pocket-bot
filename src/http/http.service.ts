@@ -11,7 +11,7 @@ export class HttpService {
 
   private init() {
     this.axiosInstance = axios.create({
-      baseURL: process.env.POCKET_OAUTH_HOST,
+      baseURL: process.env.POCKET_HOST,
       headers: {
         'Content-Type': 'application/json',
         'X-Accept': 'application/json',

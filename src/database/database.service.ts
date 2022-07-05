@@ -25,7 +25,9 @@ export class DatabaseService {
 
   async query(query: string, values: any[] = []): Promise<any[]> {
     try {
-      return (await this.pool.query(query, values)).rows;
+      const response = await this.pool.query(query, values);
+
+      return response.rows;
     } catch (error) {
       throw error;
     }

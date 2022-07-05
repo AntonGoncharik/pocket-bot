@@ -13,6 +13,17 @@ export interface AccessTokenBody {
 }
 
 export interface AccessTokenResponse {
+  access_token: string;
+  username: string;
+}
+
+export interface AddBody {
+  url: string;
+  consumer_key: string;
+  access_token: string;
+}
+
+export interface AddResponse {
   accessToken: string;
   username: string;
 }

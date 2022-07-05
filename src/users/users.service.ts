@@ -18,6 +18,7 @@ export class UsersService {
         chatId,
         requestToken,
       ]);
+
       return user[0];
     } catch (error) {
       throw error;
@@ -27,9 +28,10 @@ export class UsersService {
   async update(chatId: number, accessToken: string): Promise<User> {
     try {
       const user = await this.databaseService.query(UPDATE_QUERY, [
-        chatId,
         accessToken,
+        chatId,
       ]);
+
       return user[0];
     } catch (error) {
       throw error;
@@ -41,6 +43,7 @@ export class UsersService {
       const user = await this.databaseService.query(GET_USER_BY_CHAT_ID_QUERY, [
         chatId,
       ]);
+
       return user[0];
     } catch (error) {
       throw error;
